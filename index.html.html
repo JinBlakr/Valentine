@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For You ❤️</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: 'Pacifico', cursive;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #ffd6e8, #ff9acb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* POLAROIDS */
+.polaroids {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.polaroid {
+  position: absolute;
+  width: 160px;
+  height: 205px;
+  background: white;
+  padding: 10px 10px 30px;
+  border-radius: 6px;
+  box-shadow: 0 15px 35px rgba(255,105,180,0.4);
+  animation: popIn 0.9s ease forwards, float 10s ease-in-out infinite;
+}
+
+.polaroid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.polaroid span {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.75rem;
+  color: #ff3d8b;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.6) rotate(var(--rot)); }
+  to { opacity: 1; transform: scale(1) rotate(var(--rot)); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0) rotate(var(--rot)); }
+  50% { transform: translateY(-10px) rotate(var(--rot)); }
+  100% { transform: translateY(0) rotate(var(--rot)); }
+}
+
+/* CARD */
+.card {
+  position: relative;
+  z-index: 10;
+  background: rgba(255,245,250,0.97);
+  padding: 35px 45px;
+  border-radius: 28px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(255,105,180,0.45);
+  max-width: 520px;
+}
+
+h1 {
+  font-size: 2.8rem;
+  color: #ff3d8b;
+}
+
+#countdown {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.1rem;
+  color: #ff3d8b;
+  margin-bottom: 20px;
+}
+
+.buttons {
+  display: flex;
+  gap: 25px;
+  justify-content: center;
+}
+
+button {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.5rem;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#yesBtn {
+  background: #ff69b4;
+  color: white;
+}
+
+#noBtn {
+  background: #ffd1dc;
+  color: #ff3d8b;
+}
+
+#message {
+  margin-top: 25px;
+  font-size: 2rem;
+  color: #ff3d8b;
+  display: none;
+}
+
+/* LOVE MESSAGE */
+#loveMessage {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  font-size: 4rem;
+  color: #ff3d8b;
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 10px 30px rgba(255,105,180,0.5);
+}
+
+@keyframes loveFadeIn {
+  from { opacity: 0; transform: translateX(-50%) scale(0.6); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* HEARTS */
+.heart {
+  position: fixed;
+  bottom: -20px;
+  font-size: 24px;
+  animation: floatHeart 6s linear forwards;
+  z-index: 25;
+  pointer-events: none;
+}
+
+@keyframes floatHeart {
+  to { transform: translateY(-110vh) scale(1.4); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="polaroids" id="polaroids"></div>
+
+<audio id="music" loop muted autoplay>
+  <source src="Dave - Raindance (ft. Tems).m4a" type="audio/mp4">
+</audio>
+
+<div class="card">
+  <h1 id="question">Will you be my Valentine? 💖</h1>
+  <div id="countdown"></div>
+
+  <div class="buttons">
+    <button id="yesBtn">Yes 💕</button>
+    <button id="noBtn">No 💔</button>
+  </div>
+
+  <div id="message">Yayyy!! 🌹💐 You just made my heart so happy 💕</div>
+</div>
+
+<div id="loveMessage">I love you ❤️</div>
+
+<script>
+const images = [
+  "bg1.jpg","bg2.jpg","bg3.jpg","bg4.jpg","bg5.jpg","bg6.jpg",
+  "bg7.jpg","bg8.jpg","bg9.jpg","bg10.jpg","bg11.jpg","bg12.jpg"
+];
+
+const polaroids = document.getElementById("polaroids");
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const message = document.getElementById("message");
+const music = document.getElementById("music");
+const loveMessage = document.getElementById("loveMessage");
+const question = document.getElementById("question");
+const buttons = document.querySelector(".buttons");
+
+/* POLAROIDS — EVEN SCREEN FILL */
+const cols = 4;
+const rows = 3;
+const spacingX = window.innerWidth / cols;
+const spacingY = window.innerHeight / rows;
+
+images.forEach((src, i) => {
+  const p = document.createElement("div");
+  p.className = "polaroid";
+
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+
+  p.style.left = col * spacingX + (Math.random() * 80 - 40) + "px";
+  p.style.top = row * spacingY + (Math.random() * 80 - 40) + "px";
+  p.style.setProperty("--rot", `${Math.random() * 14 - 7}deg`);
+
+  const img = document.createElement("img");
+  img.src = src;
+  img.onerror = () => p.remove();
+  p.appendChild(img);
+
+  const cap = document.createElement("span");
+  cap.textContent = "us 💕";
+  p.appendChild(cap);
+
+  polaroids.appendChild(p);
+});
+
+/* BUTTONS */
+let started = false;
+
+noBtn.onclick = () => {
+  noBtn.style.transform =
+    `translate(${Math.random()*120-60}px, ${Math.random()*120-60}px)`;
+};
+
+yesBtn.onclick = () => {
+  if (started) return;
+  started = true;
+
+  question.style.display = "none";
+  buttons.style.display = "none";
+  message.style.display = "block";
+
+  music.muted = false;
+  music.volume = 0;
+  let vol = 0;
+  const fade = setInterval(() => {
+    if (vol >= 0.6) return clearInterval(fade);
+    vol += 0.02;
+    music.volume = vol;
+  }, 120);
+
+  setInterval(() => {
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.textContent = "💖";
+    h.style.left = Math.random() * 100 + "vw";
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 6000);
+  }, 300);
+
+  loveMessage.style.animation = "loveFadeIn 1.5s ease forwards";
+};
+
+/* COUNTDOWN */
+const countdown = document.getElementById("countdown");
+function updateCountdown() {
+  const now = new Date();
+  let v = new Date(now.getFullYear(), 1, 14);
+  if (now > v) v.setFullYear(v.getFullYear() + 1);
+
+  const diff = v - now;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor(diff / 3600000) % 24;
+  const m = Math.floor(diff / 60000) % 60;
+  const s = Math.floor(diff / 1000) % 60;
+
+  countdown.textContent =
+    `⏳ ${d}d ${h}h ${m}m ${s}s until Valentine's Day 💕`;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+
+</body>
+</html>
