@@ -17,27 +17,42 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-user-select: none;
-  user-select: none;
+  transition: transform 2s ease;
+}
+
+body.zoom {
+  transform: scale(1);
+}
+
+/* BACKGROUND SLIDESHOW */
+.bg-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 2s ease;
 }
 
 /* POLAROIDS */
 .polaroids {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 5;
   pointer-events: none;
 }
 
 .polaroid {
   position: absolute;
-  width: 180px;
+  width: 300px;
   height: 230px;
   background: white;
   padding: 10px 10px 32px;
   border-radius: 6px;
   box-shadow: 0 15px 35px rgba(255,105,180,0.4);
-  animation: popIn 0.9s ease forwards, float 10s ease-in-out infinite;
+  animation: popIn 0.9s ease forwards;
+  transition: transform 2s ease, opacity 2s ease;
 }
 
 .polaroid img {
@@ -62,41 +77,23 @@ body {
   to { opacity: 1; transform: scale(1) rotate(var(--rot)); }
 }
 
-@keyframes float {
-  0% { transform: translateY(0) rotate(var(--rot)); }
-  50% { transform: translateY(-10px) rotate(var(--rot)); }
-  100% { transform: translateY(0) rotate(var(--rot)); }
-}
-
 /* CARD */
 .card {
   position: relative;
-  z-index: 10;
+  z-index: 25;
   background: rgba(255,245,250,0.97);
   padding: 35px 45px;
   border-radius: 28px;
   text-align: center;
   box-shadow: 0 25px 50px rgba(255,105,180,0.45);
-  max-width: 520px;
 }
 
-h1 {
-  font-size: 2.8rem;
-  color: #ff3d8b;
-}
-
-#countdown {
-  font-family: 'Quicksand', sans-serif;
-  font-size: 1.1rem;
-  color: #ff3d8b;
-  margin-bottom: 20px;
-}
+h1 { color: #ff3d8b; }
 
 .buttons {
   display: flex;
   gap: 25px;
   justify-content: center;
-  flex-wrap: wrap;
 }
 
 button {
@@ -106,117 +103,16 @@ button {
   border-radius: 50px;
   border: none;
   cursor: pointer;
-  transition: 0.3s;
 }
 
-@media (max-width: 768px) {
-  h1 {
-    font-size: 1.8rem;
-    margin: 0 0 15px 0;
-  }
-  
-  .card {
-    padding: 25px 20px;
-    max-width: 90vw;
-    margin: 20px;
-  }
-  
-  button {
-    font-size: 1.2rem;
-    padding: 12px 24px;
-    min-width: 100px;
-  }
-  
-  .buttons {
-    gap: 15px;
-  }
-  
-  #countdown {
-    font-size: 0.9rem;
-  }
-  
-  #message {
-    font-size: 1.5rem;
-  }
-  
-  .polaroid {
-    width: 140px !important;
-    height: 180px !important;
-    padding: 8px 8px 25px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    height: auto;
-  }
-  
-  h1 {
-    font-size: 1.5rem !important;
-  }
-  
-  .card {
-    padding: 20px 15px !important;
-    max-width: 95vw !important;
-    border-radius: 20px;
-  }
-  
-  button {
-    font-size: 1rem !important;
-    padding: 10px 20px !important;
-    min-width: 90px;
-  }
-  
-  .buttons {
-    gap: 10px !important;
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  button {
-    width: 100%;
-    max-width: 150px;
-    margin: 0 auto;
-  }
-  
-  #countdown {
-    font-size: 0.8rem !important;
-  }
-  
-  #message {
-    font-size: 1.2rem !important;
-  }
-  
-  .polaroid {
-    width: 120px !important;
-    height: 155px !important;
-    padding: 7px 7px 20px !important;
-  }
-  
-  .polaroid span {
-    font-size: 0.65rem !important;
-  }
-  
-  #loveMessage {
-    font-size: 2.5rem !important;
-  }
-}
-
-#yesBtn {
-  background: #ff69b4;
-  color: white;
-}
-
-#noBtn {
-  background: #ffd1dc;
-  color: #ff3d8b;
-}
+#yesBtn { background: #ff69b4; color: white; }
+#noBtn { background: #ffd1dc; color: #ff3d8b; }
 
 #message {
+  display: none;
   margin-top: 25px;
   font-size: 2rem;
   color: #ff3d8b;
-  display: none;
 }
 
 /* LOVE MESSAGE */
@@ -230,7 +126,6 @@ button {
   color: #ff3d8b;
   opacity: 0;
   pointer-events: none;
-  text-shadow: 0 10px 30px rgba(255,105,180,0.5);
 }
 
 @keyframes loveFadeIn {
@@ -245,7 +140,6 @@ button {
   font-size: 24px;
   animation: floatHeart 6s linear forwards;
   z-index: 25;
-  pointer-events: none;
 }
 
 @keyframes floatHeart {
@@ -256,6 +150,7 @@ button {
 
 <body>
 
+<div class="bg-slideshow" id="bgSlide"></div>
 <div class="polaroids" id="polaroids"></div>
 
 <audio id="music" loop>
@@ -264,93 +159,104 @@ button {
 
 <div class="card">
   <h1 id="question">Will you be my Valentine? 💖</h1>
-  <div id="countdown"></div>
-
   <div class="buttons">
     <button id="yesBtn">Yes 💕</button>
     <button id="noBtn">No 💔</button>
   </div>
-
-  <div id="message">Yayyy!! 🌹💐 You just made my heart so happy 💕</div>
+  <div id="message">💕 1 Red Oman Never 2 💕
+  </div>
 </div>
 
 <div id="loveMessage">I love you ❤️</div>
 
 <script>
-const images = [
-  "bg1.jpg","bg2.jpg","bg3.jpg","bg4.jpg","bg5.jpg",
-  "bg6.jpg","bg7.jpg","bg8.jpg","bg9.jpg","bg10.jpg",
-  "bg11.jpg","bg12.jpg","bg13.jpg","bg14.jpg","bg15.jpg",
-  "bg16.jpg","bg17.jpg","bg18.jpg","bg19.jpg","bg20.jpg",
-  "bg21.jpg","bg22.jpg","bg23.jpg","bg24.jpg"
-];
-
+const images = Array.from({ length: 24 }, (_, i) => `bg${i + 1}.jpg`);
+const bg = document.getElementById("bgSlide");
 const polaroids = document.getElementById("polaroids");
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
-const message = document.getElementById("message");
 const music = document.getElementById("music");
-const loveMessage = document.getElementById("loveMessage");
+const message = document.getElementById("message");
 const question = document.getElementById("question");
 const buttons = document.querySelector(".buttons");
+const loveMessage = document.getElementById("loveMessage");
 
-/* POLAROIDS — RESPONSIVE GRID */
-const isMobile = window.innerWidth < 768;
-const isSmallMobile = window.innerWidth < 480;
-const cols = isSmallMobile ? 2 : isMobile ? 4 : 6;
-const rows = Math.ceil(images.length / cols);
+/* INITIAL POLAROIDS */
+const cols = window.innerWidth < 480 ? 2 : window.innerWidth < 768 ? 4 : 6;
 const spacingX = window.innerWidth / cols;
 const spacingY = 240;
+
+const allPolaroids = [];
 
 images.forEach((src, i) => {
   const p = document.createElement("div");
   p.className = "polaroid";
-
-  const col = i % cols;
-  const row = Math.floor(i / cols);
-
-  p.style.left = col * spacingX + (Math.random() * 15 - 8) + "px";
-  p.style.top = row * spacingY + (Math.random() * 15 - 8) + "px";
-  p.style.setProperty("--rot", `${Math.random() * 14 - 7}deg`);
+  p.style.left = (i % cols) * spacingX + "px";
+  p.style.top = Math.floor(i / cols) * spacingY + "px";
+  p.style.setProperty("--rot", `${Math.random() * 30 - 15}deg`);
 
   const img = document.createElement("img");
   img.src = src;
-  img.onerror = () => console.log("Image not found: " + src);
   p.appendChild(img);
 
   const cap = document.createElement("span");
-  cap.textContent = "us 💕";
+  cap.textContent = "MY LOVE 💕";
   p.appendChild(cap);
 
   polaroids.appendChild(p);
+  allPolaroids.push(p);
 });
 
-/* BUTTONS */
-let started = false;
-
+/* NO BUTTON */
 noBtn.onclick = () => {
   noBtn.style.transform =
-    `translate(${Math.random()*120-60}px, ${Math.random()*120-60}px)`;
+    `translate(${Math.random() * 120 - 60}px, ${Math.random() * 120 - 60}px)`;
 };
+
+/* YES BUTTON */
+let started = false;
 
 yesBtn.onclick = () => {
   if (started) return;
   started = true;
 
+  document.body.classList.add("zoom");
   question.style.display = "none";
   buttons.style.display = "none";
   message.style.display = "block";
 
-  music.muted = false;
+  // Play music with fade
   music.volume = 0;
-  music.play().catch(err => console.log("Audio play failed:", err));
-  let vol = 0;
+  music.play();
   const fade = setInterval(() => {
-    if (vol >= 0.6) return clearInterval(fade);
-    vol += 0.02;
-    music.volume = vol;
+    if (music.volume >= 0.6) clearInterval(fade);
+    music.volume += 0.02;
   }, 120);
 
+  // Start background slideshow
+  let index = 0;
+  bg.style.backgroundImage = `url('${images[index]}')`;
+  bg.style.opacity = 1;
+  setInterval(() => {
+    bg.style.opacity = 0;
+    setTimeout(() => {
+      index = (index + 1) % images.length;
+      bg.style.backgroundImage = `url('${images[index]}')`;
+      bg.style.opacity = 1;
+    }, 1000);
+  }, 5000);
+
+  // Animate polaroids continuously (shuffle, rotate slightly)
+  setInterval(() => {
+    allPolaroids.forEach(p => {
+      const dx = Math.random() * 20 - 10;
+      const dy = Math.random() * 20 - 10;
+      const rot = Math.random() * 30 - 15;
+      p.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+    });
+  }, 2000);
+
+  // Hearts animation
   setInterval(() => {
     const h = document.createElement("div");
     h.className = "heart";
@@ -360,27 +266,9 @@ yesBtn.onclick = () => {
     setTimeout(() => h.remove(), 6000);
   }, 300);
 
+  // Love message
   loveMessage.style.animation = "loveFadeIn 1.5s ease forwards";
 };
-
-/* COUNTDOWN */
-const countdown = document.getElementById("countdown");
-function updateCountdown() {
-  const now = new Date();
-  let v = new Date(now.getFullYear(), 1, 14);
-  if (now > v) v.setFullYear(v.getFullYear() + 1);
-
-  const diff = v - now;
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor(diff / 3600000) % 24;
-  const m = Math.floor(diff / 60000) % 60;
-  const s = Math.floor(diff / 1000) % 60;
-
-  countdown.textContent =
-    `⏳ ${d}d ${h}h ${m}m ${s}s until Valentine's Day 💕`;
-}
-setInterval(updateCountdown, 1000);
-updateCountdown();
 </script>
 
 </body>
