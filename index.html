@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For You ❤️</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
@@ -16,6 +17,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* POLAROIDS */
@@ -28,10 +31,10 @@ body {
 
 .polaroid {
   position: absolute;
-  width: 160px;
-  height: 205px;
+  width: 220px;
+  height: 280px;
   background: white;
-  padding: 10px 10px 30px;
+  padding: 12px 12px 40px;
   border-radius: 6px;
   box-shadow: 0 15px 35px rgba(255,105,180,0.4);
   animation: popIn 0.9s ease forwards, float 10s ease-in-out infinite;
@@ -93,6 +96,7 @@ h1 {
   display: flex;
   gap: 25px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 button {
@@ -103,6 +107,99 @@ button {
   border: none;
   cursor: pointer;
   transition: 0.3s;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8rem;
+    margin: 0 0 15px 0;
+  }
+  
+  .card {
+    padding: 25px 20px;
+    max-width: 90vw;
+    margin: 20px;
+  }
+  
+  button {
+    font-size: 1.2rem;
+    padding: 12px 24px;
+    min-width: 100px;
+  }
+  
+  .buttons {
+    gap: 15px;
+  }
+  
+  #countdown {
+    font-size: 0.9rem;
+  }
+  
+  #message {
+    font-size: 1.5rem;
+  }
+  
+  .polaroid {
+    width: 140px !important;
+    height: 180px !important;
+    padding: 8px 8px 25px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    height: auto;
+  }
+  
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .card {
+    padding: 20px 15px !important;
+    max-width: 95vw !important;
+    border-radius: 20px;
+  }
+  
+  button {
+    font-size: 1rem !important;
+    padding: 10px 20px !important;
+    min-width: 90px;
+  }
+  
+  .buttons {
+    gap: 10px !important;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  button {
+    width: 100%;
+    max-width: 150px;
+    margin: 0 auto;
+  }
+  
+  #countdown {
+    font-size: 0.8rem !important;
+  }
+  
+  #message {
+    font-size: 1.2rem !important;
+  }
+  
+  .polaroid {
+    width: 120px !important;
+    height: 155px !important;
+    padding: 7px 7px 20px !important;
+  }
+  
+  .polaroid span {
+    font-size: 0.65rem !important;
+  }
+  
+  #loveMessage {
+    font-size: 2.5rem !important;
+  }
 }
 
 #yesBtn {
@@ -161,7 +258,7 @@ button {
 
 <div class="polaroids" id="polaroids"></div>
 
-<audio id="music" loop muted autoplay>
+<audio id="music" loop>
   <source src="Dave - Raindance (ft. Tems).m4a" type="audio/mp4">
 </audio>
 
@@ -182,7 +279,9 @@ button {
 <script>
 const images = [
   "bg1.jpg","bg2.jpg","bg3.jpg","bg4.jpg","bg5.jpg","bg6.jpg",
-  "bg7.jpg","bg8.jpg","bg9.jpg","bg10.jpg","bg11.jpg","bg12.jpg"
+  "bg7.jpg","bg8.jpg","bg9.jpg","bg13.jpg","bg14.jpg","bg15.jpg",
+  "bg16.jpg","bg17.jpg","bg18.jpg","bg19.jpg","bg20.jpg","bg21.jpg",
+  "bg22.jpg","bg23.jpg","bg24.jpg","bg25.jpg"
 ];
 
 const polaroids = document.getElementById("polaroids");
@@ -194,11 +293,13 @@ const loveMessage = document.getElementById("loveMessage");
 const question = document.getElementById("question");
 const buttons = document.querySelector(".buttons");
 
-/* POLAROIDS — EVEN SCREEN FILL */
-const cols = 4;
-const rows = 3;
+/* POLAROIDS — RESPONSIVE GRID */
+const isMobile = window.innerWidth < 768;
+const isSmallMobile = window.innerWidth < 480;
+const cols = isSmallMobile ? 2 : isMobile ? 3 : 5;
+const rows = isSmallMobile ? 8 : isMobile ? 6 : 5;
 const spacingX = window.innerWidth / cols;
-const spacingY = window.innerHeight / rows;
+const spacingY = (window.innerHeight * 1.5) / rows;
 
 images.forEach((src, i) => {
   const p = document.createElement("div");
@@ -207,13 +308,13 @@ images.forEach((src, i) => {
   const col = i % cols;
   const row = Math.floor(i / cols);
 
-  p.style.left = col * spacingX + (Math.random() * 80 - 40) + "px";
-  p.style.top = row * spacingY + (Math.random() * 80 - 40) + "px";
+  p.style.left = col * spacingX + (Math.random() * 30 - 15) + "px";
+  p.style.top = row * spacingY + (Math.random() * 30 - 15) + "px";
   p.style.setProperty("--rot", `${Math.random() * 14 - 7}deg`);
 
   const img = document.createElement("img");
   img.src = src;
-  img.onerror = () => p.remove();
+  img.onerror = () => console.log("Image not found: " + src);
   p.appendChild(img);
 
   const cap = document.createElement("span");
@@ -241,6 +342,7 @@ yesBtn.onclick = () => {
 
   music.muted = false;
   music.volume = 0;
+  music.play().catch(err => console.log("Audio play failed:", err));
   let vol = 0;
   const fade = setInterval(() => {
     if (vol >= 0.6) return clearInterval(fade);
