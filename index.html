@@ -21,18 +21,28 @@ body {
 }
 
 body.zoom {
-  transform: scale(1);
+  transform: scale(1.08);
 }
 
-/* BACKGROUND SLIDESHOW */
+/* BACKGROUND */
 .bg-slideshow {
   position: fixed;
   inset: 0;
-  z-index: 15;
+  z-index: 10;
   background-size: cover;
   background-position: center;
   opacity: 0;
   transition: opacity 2s ease;
+}
+
+/* BLUR OVERLAY */
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 182, 193, 0.25);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 1.5s ease;
 }
 
 /* POLAROIDS */
@@ -52,7 +62,7 @@ body.zoom {
   border-radius: 6px;
   box-shadow: 0 15px 35px rgba(255,105,180,0.4);
   animation: popIn 0.9s ease forwards;
-  transition: transform 2s ease, opacity 2s ease;
+  transition: transform 2s ease;
 }
 
 .polaroid img {
@@ -77,6 +87,16 @@ body.zoom {
   to { opacity: 1; transform: scale(1) rotate(var(--rot)); }
 }
 
+/* COUNTDOWN */
+#countdown {
+  position: fixed;
+  z-index: 50;
+  font-size: 6rem;
+  color: white;
+  opacity: 1;
+  transition: opacity 1s ease, transform 1s ease;
+}
+
 /* CARD */
 .card {
   position: relative;
@@ -86,14 +106,48 @@ body.zoom {
   border-radius: 28px;
   text-align: center;
   box-shadow: 0 25px 50px rgba(255,105,180,0.45);
+
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-h1 { color: #ff3d8b; }
+.card.show {
+  opacity: 1;
+  transform: translateY(0);
+  animation: floatCard 4s ease-in-out infinite;
+}
 
+@keyframes floatCard {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* TITLE */
+#question {
+  color: #ff3d8b;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+#question.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* BUTTONS */
 .buttons {
   display: flex;
   gap: 25px;
   justify-content: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.buttons.show {
+  opacity: 1;
 }
 
 button {
@@ -105,8 +159,23 @@ button {
   cursor: pointer;
 }
 
-#yesBtn { background: #ff69b4; color: white; }
-#noBtn { background: #ffd1dc; color: #ff3d8b; }
+/* YES BUTTON */
+#yesBtn {
+  background: #ff69b4;
+  color: white;
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0px rgba(255,105,180,0.7); }
+  50% { box-shadow: 0 0 25px rgba(255,105,180,0.9); }
+  100% { box-shadow: 0 0 0px rgba(255,105,180,0.7); }
+}
+
+#noBtn {
+  background: #ffd1dc;
+  color: #ff3d8b;
+}
 
 #message {
   display: none;
@@ -125,12 +194,6 @@ button {
   font-size: 4rem;
   color: #ff3d8b;
   opacity: 0;
-  pointer-events: none;
-}
-
-@keyframes loveFadeIn {
-  from { opacity: 0; transform: translateX(-50%) scale(0.6); }
-  to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
 /* HEARTS */
@@ -139,18 +202,27 @@ button {
   bottom: -20px;
   font-size: 24px;
   animation: floatHeart 6s linear forwards;
-  z-index: 25;
+  z-index: 30;
 }
 
 @keyframes floatHeart {
   to { transform: translateY(-110vh) scale(1.4); opacity: 0; }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .polaroid { width: 140px; height: 110px; }
+  h1 { font-size: 1.5rem; }
+  button { font-size: 1rem; padding: 10px 20px; }
 }
 </style>
 </head>
 
 <body>
 
+<div id="countdown">3</div>
 <div class="bg-slideshow" id="bgSlide"></div>
+<div class="bg-overlay" id="overlay"></div>
 <div class="polaroids" id="polaroids"></div>
 
 <audio id="music" loop>
@@ -163,112 +235,157 @@ button {
     <button id="yesBtn">Yes 💕</button>
     <button id="noBtn">No 💔</button>
   </div>
-  <div id="message">💕 1 Red Oman Never 2 💕
-  </div>
+  <div id="message">💕 1 Red Oman Never 2 💕</div>
 </div>
 
-<div id="loveMessage">I love you ❤️</div>
+<div id="loveMessage"></div>
 
 <script>
-const images = Array.from({ length: 24 }, (_, i) => `bg${i + 1}.jpg`);
-const bg = document.getElementById("bgSlide");
-const polaroids = document.getElementById("polaroids");
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
-const music = document.getElementById("music");
-const message = document.getElementById("message");
-const question = document.getElementById("question");
-const buttons = document.querySelector(".buttons");
-const loveMessage = document.getElementById("loveMessage");
-
-/* INITIAL POLAROIDS */
-const cols = window.innerWidth < 480 ? 2 : window.innerWidth < 768 ? 4 : 6;
-const spacingX = window.innerWidth / cols;
-const spacingY = 240;
-
-const allPolaroids = [];
-
-images.forEach((src, i) => {
-  const p = document.createElement("div");
-  p.className = "polaroid";
-  p.style.left = (i % cols) * spacingX + "px";
-  p.style.top = Math.floor(i / cols) * spacingY + "px";
-  p.style.setProperty("--rot", `${Math.random() * 30 - 15}deg`);
-
-  const img = document.createElement("img");
-  img.src = src;
-  p.appendChild(img);
-
-  const cap = document.createElement("span");
-  cap.textContent = "MY LOVE 💕";
-  p.appendChild(cap);
-
-  polaroids.appendChild(p);
-  allPolaroids.push(p);
-});
-
-/* NO BUTTON */
-noBtn.onclick = () => {
-  noBtn.style.transform =
-    `translate(${Math.random() * 120 - 60}px, ${Math.random() * 120 - 60}px)`;
+const App = {
+  state: { started:false, noScale:1, slideshowIndex:0 },
+  elements: {
+    bg: bgSlide,
+    overlay: overlay,
+    polaroids: polaroids,
+    yesBtn: yesBtn,
+    noBtn: noBtn,
+    music: music,
+    message: message,
+    question: question,
+    buttons: document.querySelector(".buttons"),
+    loveMessage: loveMessage
+  },
+  images: Array.from({ length: 24 }, (_, i) => `bg${i+1}.jpg`)
 };
 
-/* YES BUTTON */
-let started = false;
+App.init = function(){
+  this.personalize();
+  this.createPolaroids();
+  this.attachEvents();
+  this.startIntro();
+};
 
-yesBtn.onclick = () => {
-  if (started) return;
-  started = true;
+App.personalize = function(){
+  const name = new URLSearchParams(window.location.search).get("name");
+  if(name) this.elements.question.textContent =
+    `Will you be my Valentine, ${name}? 💖`;
+};
+
+App.startIntro = function(){
+  const cd = countdown;
+  const card = document.querySelector(".card");
+  let count = 3;
+
+  const timer = setInterval(()=>{
+    count--;
+    if(count===0){
+      clearInterval(timer);
+      cd.style.opacity=0;
+      cd.style.transform="scale(1.5)";
+      setTimeout(()=>{
+        cd.style.display="none";
+        card.classList.add("show");
+        setTimeout(()=>question.classList.add("show"),600);
+        setTimeout(()=>this.elements.buttons.classList.add("show"),1200);
+      },1000);
+    } else cd.textContent=count;
+  },1000);
+};
+
+App.createPolaroids=function(){
+  const cols=window.innerWidth<480?2:window.innerWidth<768?4:6;
+  const spacingX=window.innerWidth/cols, spacingY=240;
+  this.images.forEach((src,i)=>{
+    const p=document.createElement("div");
+    p.className="polaroid";
+    p.style.left=(i%cols)*spacingX+"px";
+    p.style.top=Math.floor(i/cols)*spacingY+"px";
+    p.style.setProperty("--rot",`${Math.random()*30-15}deg`);
+    p.innerHTML=`<img src="${src}"><span>MY LOVE 💕</span>`;
+    this.elements.polaroids.appendChild(p);
+  });
+};
+
+App.attachEvents=function(){
+  this.elements.yesBtn.onclick=()=>this.handleYes();
+  this.elements.noBtn.onclick=()=>this.handleNo();
+};
+
+App.handleNo=function(){
+  this.state.noScale-=0.1;
+  this.elements.noBtn.style.transform=
+    `translate(${Math.random()*120-60}px,
+               ${Math.random()*120-60}px)
+     scale(${this.state.noScale})`;
+  if(this.state.noScale<=0.4)
+    this.elements.noBtn.style.display="none";
+};
+
+App.handleYes=function(){
+  if(this.state.started) return;
+  this.state.started=true;
 
   document.body.classList.add("zoom");
-  question.style.display = "none";
-  buttons.style.display = "none";
-  message.style.display = "block";
+  this.elements.overlay.style.opacity=1;
+  this.elements.question.style.display="none";
+  this.elements.buttons.style.display="none";
+  this.elements.message.style.display="block";
 
-  // Play music with fade
-  music.volume = 0;
-  music.play();
-  const fade = setInterval(() => {
-    if (music.volume >= 0.6) clearInterval(fade);
-    music.volume += 0.02;
-  }, 120);
-
-  // Start background slideshow
-  let index = 0;
-  bg.style.backgroundImage = `url('${images[index]}')`;
-  bg.style.opacity = 1;
-  setInterval(() => {
-    bg.style.opacity = 0;
-    setTimeout(() => {
-      index = (index + 1) % images.length;
-      bg.style.backgroundImage = `url('${images[index]}')`;
-      bg.style.opacity = 1;
-    }, 1000);
-  }, 5000);
-
-  // Animate polaroids continuously (shuffle, rotate slightly)
-  setInterval(() => {
-    allPolaroids.forEach(p => {
-      const dx = Math.random() * 20 - 10;
-      const dy = Math.random() * 20 - 10;
-      const rot = Math.random() * 30 - 15;
-      p.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
-    });
-  }, 2000);
-
-  // Hearts animation
-  setInterval(() => {
-    const h = document.createElement("div");
-    h.className = "heart";
-    h.textContent = "💖";
-    h.style.left = Math.random() * 100 + "vw";
-    document.body.appendChild(h);
-    setTimeout(() => h.remove(), 6000);
-  }, 300);
-
-  // Love message
-  loveMessage.style.animation = "loveFadeIn 1.5s ease forwards";
+  this.startMusic();
+  this.startSlideshow();
+  this.startHearts();
+  this.typeMessage();
 };
+
+App.startMusic=function(){
+  const m=this.elements.music;
+  m.volume=0;
+  m.play().catch(()=>document.body.onclick=()=>m.play());
+  const fade=setInterval(()=>{
+    if(m.volume>=0.6) clearInterval(fade);
+    else m.volume+=0.02;
+  },120);
+};
+
+App.startSlideshow=function(){
+  const bg=this.elements.bg;
+  bg.style.backgroundImage=`url('${this.images[0]}')`;
+  bg.style.opacity=1;
+  setInterval(()=>{
+    bg.style.opacity=0;
+    setTimeout(()=>{
+      this.state.slideshowIndex=
+        (this.state.slideshowIndex+1)%this.images.length;
+      bg.style.backgroundImage=
+        `url('${this.images[this.state.slideshowIndex]}')`;
+      bg.style.opacity=1;
+    },1000);
+  },5000);
+};
+
+App.startHearts=function(){
+  setInterval(()=>{
+    const h=document.createElement("div");
+    h.className="heart";
+    h.textContent="💖";
+    h.style.left=Math.random()*100+"vw";
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),6000);
+  },300);
+};
+
+App.typeMessage=function(){
+  const text="I love you Natasha❤️";
+  const el=this.elements.loveMessage;
+  el.style.opacity=1;
+  let i=0;
+  const t=setInterval(()=>{
+    el.textContent+=text[i];
+    if(++i>=text.length) clearInterval(t);
+  },100);
+};
+
+App.init();
 </script>
 
 </body>
