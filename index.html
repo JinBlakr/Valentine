@@ -101,9 +101,9 @@ body.zoom {
 .card {
   position: relative;
   z-index: 25;
-  background: rgba(255,245,250,0.97);
-  padding: 35px 45px;
-  border-radius: 28px;
+  background: rgba(248, 201, 225, 0.97);
+  padding: 20px 30px;
+  border-radius: 20px;
   text-align: center;
   box-shadow: 0 25px 50px rgba(255,105,180,0.45);
 
@@ -178,22 +178,36 @@ button {
 }
 
 #message {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: none;
-  margin-top: 25px;
+  font-family: 'Pacifico', cursive;
   font-size: 2rem;
-  color: #ff3d8b;
+  color: #ffffff;
+  z-index: 25;
+  opacity: 1;
+  transform: translateY(0);
+  animation: floatmessage 4s ease-in-out infinite;
+}
+
+@keyframes floatmessage {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 /* LOVE MESSAGE */
 #loveMessage {
   position: fixed;
   top: 18%;
-  left: 50%;
+  left: 35%;
   transform: translateX(-50%);
   z-index: 30;
   font-size: 4rem;
   color: #ff3d8b;
   opacity: 0;
+  animation: floatmessage 4s ease-in-out infinite;
 }
 
 /* HEARTS */
@@ -235,8 +249,9 @@ button {
     <button id="yesBtn">Yes 💕</button>
     <button id="noBtn">No 💔</button>
   </div>
-  <div id="message">💕 1 Red Oman Never 2 💕</div>
 </div>
+
+<div id="message">💕 1 Red Oman Never 2 💕</div>
 
 <div id="loveMessage"></div>
 
@@ -327,8 +342,7 @@ App.handleYes=function(){
 
   document.body.classList.add("zoom");
   this.elements.overlay.style.opacity=1;
-  this.elements.question.style.display="none";
-  this.elements.buttons.style.display="none";
+  document.querySelector(".card").style.display="none";
   this.elements.message.style.display="block";
 
   this.startMusic();
