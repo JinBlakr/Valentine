@@ -99,7 +99,7 @@ body.zoom {
 
 /* CARD */
 .card {
-  position: relative;
+  position: fixed;
   z-index: 25;
   background: rgba(248, 201, 225, 0.97);
   padding: 20px 30px;
@@ -178,17 +178,16 @@ button {
 }
 
 #message {
-  position: relative;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: fixed;
+  top: 25%;
+  left: 40%;
+  transform: translateX(-50%);
   display: none;
   font-family: 'Pacifico', cursive;
   font-size: 2rem;
-  color: #ffffff;
-  z-index: 25;
+  color: lch(99.19% 1.05 18.85);
+  z-index: 30;
   opacity: 1;
-  transform: translateY(0);
   animation: floatmessage 4s ease-in-out infinite;
 }
 
@@ -200,14 +199,19 @@ button {
 /* LOVE MESSAGE */
 #loveMessage {
   position: fixed;
-  top: 18%;
+  top: 15%;
   left: 35%;
   transform: translateX(-50%);
   z-index: 30;
   font-size: 4rem;
   color: #ff3d8b;
   opacity: 0;
-  animation: floatmessage 4s ease-in-out infinite;
+  animation: floatlovemessage 4s ease-in-out infinite;
+}
+
+@keyframes floatlovemessage {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 /* HEARTS */
